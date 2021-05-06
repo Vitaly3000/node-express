@@ -13,6 +13,9 @@
             Количество
           </th>
           <th>
+            Цена 1 шт
+          </th>
+          <th>
             Действия
           </th>
         </tr>
@@ -21,13 +24,26 @@
         {{#each courses}}
           <tr>
             <td>
-              {{title}}
+              <b>
+                {{title}}
+              </b>
             </td>
             <td>
-              {{count}}
+              <b>
+                {{count}}
+              </b>
             </td>
             <td>
-              <button class="btn btn-small js-remove" data-id="{{id}}">
+              <b style="font-size: 14px" class="price">
+                {{price}}
+              </b>
+            </td>
+            <td>
+              <button
+                data-csrf="{{@root.csrf}}"
+                class="btn btn-small js-remove"
+                data-id="{{_id}}"
+              >
                 Удалить
               </button>
             </td>
@@ -37,12 +53,18 @@
     </table>
     <p>
       <strong>
-        Цена:
+        Итого:
       </strong>
-      <span class="price">
+      <span class="price total-price">
         {{price}}
       </span>
     </p>
+    <form action="/orders" method="POST">
+      <input type="hidden" name="_csrf" value="{{csrf}}" />
+      <button class="btn" type="submit">
+        Сделать заказ
+      </button>
+    </form>
   {{else}}
     <p>
       Корзина пустая

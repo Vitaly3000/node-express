@@ -1,15 +1,44 @@
 const { Router } = require('express');
 const Course = require('../models/course');
+const auth = require('../middleware/auth');
+const { validationResult } = require('express-validator');
+const { courseValidators } = require('../utils/validators');
 const router = Router();
-router.get('/', (req, res) => {
-  res.render('add', {
-    title: 'добавить',
-    isAdd: true,
-  });
+router.get('/', auth, (req, res) => {
+  try {
+    res.render('add', {
+      title: 'добавить',
+      isAdd: true,
+    });
+  } catch (error) {
+    console.log(error);
+  }
 });
-router.post('/', async (req, res) => {
-  const course = new Course(req.body.title, req.body.price, req.body.img);
-  course.save();
-  res.redirect('/courses');
+router.post('/', auth, courseValidators, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).render('add', {
+      title: 'добавить',
+      isAdd: true,
+      error: errors.array()[0].msg,
+      data: {
+        title: req.body.title,
+        price: req.body.price,
+        img: req.body.img,
+      },
+    });
+  }
+  const course = new Course({
+    title: req.body.title,
+    price: req.body.price,
+    img: req.body.img,
+    userId: req.user,
+  });
+  try {
+    await course.save();
+    res.redirect('/courses');
+  } catch (e) {
+    console.log(e);
+  }
 });
 module.exports = router;
